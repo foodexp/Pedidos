@@ -2,27 +2,156 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Lanchonete - Login</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Lanchonete</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .card {
+      background: #1f1f1f;
+      padding: 40px;
+      border-radius: 15px;
+      width: 320px;
+      box-shadow: 0 0 40px rgba(255, 165, 0, 0.15);
+      text-align: center;
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: orange;
+    }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #333;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .tab.active {
+      border-bottom: 2px solid orange;
+      color: orange;
+    }
+
+    .form {
+      display: none;
+    }
+
+    .form.active {
+      display: block;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      background: #2a2a2a;
+      color: white;
+    }
+
+    input:focus {
+      outline: 1px solid orange;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: orange;
+      border: none;
+      border-radius: 8px;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #ff9900;
+    }
+
+    .footer {
+      margin-top: 15px;
+      font-size: 12px;
+      color: #aaa;
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
+<div class="card">
   <h1>🍔 Lanchonete</h1>
 
-  <h2>Cadastro</h2>
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="senha" placeholder="Senha">
-  <button onclick="cadastrar()">Cadastrar</button>
+  <div class="tabs">
+    <div class="tab active" onclick="trocar('login')">Login</div>
+    <div class="tab" onclick="trocar('cadastro')">Cadastro</div>
+  </div>
 
-  <h2>Login</h2>
-  <input type="email" id="loginEmail" placeholder="Email">
-  <input type="password" id="loginSenha" placeholder="Senha">
-  <button onclick="login()">Entrar</button>
+  <!-- LOGIN -->
+  <div id="login" class="form active">
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginSenha" placeholder="Senha">
+    <button onclick="login()">Entrar</button>
+  </div>
+
+  <!-- CADASTRO -->
+  <div id="cadastro" class="form">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="senha" placeholder="Senha">
+    <button onclick="cadastrar()">Cadastrar</button>
+  </div>
+
+  <div class="footer">
+    Sistema de pedidos 🍔
+  </div>
 </div>
 
 <script src="https://unpkg.com/@supabase/supabase-js"></script>
 <script src="app.js"></script>
+
+<script>
+  function trocar(tipo) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
+
+    if (tipo === 'login') {
+      document.querySelectorAll('.tab')[0].classList.add('active');
+      document.getElementById('login').classList.add('active');
+    } else {
+      document.querySelectorAll('.tab')[1].classList.add('active');
+      document.getElementById('cadastro').classList.add('active');
+    }
+  }
+</script>
 
 </body>
 </html>
