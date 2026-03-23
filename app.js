@@ -23,6 +23,19 @@ async function cadastrar() {
     alert("Cadastro realizado! Verifique seu email.");
   }
 }
+async function loginGoogle() {
+  const { error } = await supabaseClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: 'https://foodexp.github.io/Pedidos/cardapio.html'
+    }
+  });
+
+  if (error) {
+    alert("Erro no login com Google");
+    console.log(error);
+  }
+}
 
 // 🔑 LOGIN
 async function login() {
