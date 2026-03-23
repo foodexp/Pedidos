@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Cardápio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>🍔 Cardápio</h1>
+
+<div class="produtos">
+
+  <div class="item">
+    <h3>X-Burger</h3>
+    <p>R$ 15</p>
+    <button onclick="adicionar('X-Burger', 15)">Adicionar</button>
+  </div>
+
+  <div class="item">
+    <h3>X-Tudo</h3>
+    <p>R$ 20</p>
+    <button onclick="adicionar('X-Tudo', 20)">Adicionar</button>
+  </div>
+
+  <div class="item">
+    <h3>Batata</h3>
+    <p>R$ 10</p>
+    <button onclick="adicionar('Batata', 10)">Adicionar</button>
+  </div>
+
+</div>
+
+<h2>🛒 Carrinho</h2>
+<ul id="carrinho"></ul>
+
+<h3 id="total"></h3>
+
+<button onclick="finalizarPedido()">Finalizar Pedido</button>
+
+<script src="https://unpkg.com/@supabase/supabase-js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
