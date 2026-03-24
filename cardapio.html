@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zap Delivery — Cardápio</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<!-- QR Code library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -27,6 +29,8 @@
   --gdim:    rgba(0,201,107,0.12);
   --red:     #FF4040;
   --radius:  14px;
+  --pix:     #32BCAD;
+  --pixdim:  rgba(50,188,173,0.13);
 }
 
 body {
@@ -206,9 +210,7 @@ header {
 }
 #overlay.on { opacity:1; pointer-events:all; }
 
-/* ══════════════════════════════════════
-   DRAWER (CART)
-══════════════════════════════════════ */
+/* ══ DRAWER ══ */
 #drawer {
   position:fixed; top:0; right:0; bottom:0;
   width:min(420px,100vw); z-index:300;
@@ -297,9 +299,7 @@ header {
 .arrow { transition:transform .2s; }
 #btnFinalizar:not(:disabled):hover .arrow { transform:translateX(4px); }
 
-/* ══════════════════════════════════════
-   CHECKOUT MODAL
-══════════════════════════════════════ */
+/* ══ CHECKOUT MODAL ══ */
 #checkoutModal {
   position:fixed; inset:0; z-index:500;
   display:flex; align-items:flex-end; justify-content:center;
@@ -333,36 +333,26 @@ header {
   flex-shrink:0;
 }
 
-/* ── Steps nav ── */
+/* Steps */
 .steps-nav {
   display:flex; align-items:center; justify-content:center;
   gap:0; padding:18px 24px 14px; flex-shrink:0;
 }
-.step-item {
-  display:flex; align-items:center; gap:8px;
-}
+.step-item { display:flex; align-items:center; gap:8px; }
 .step-circle {
   width:28px; height:28px; border-radius:50%;
   background:var(--s3); border:1px solid var(--border);
   display:flex; align-items:center; justify-content:center;
   font-family:'Syne',sans-serif; font-size:11px; font-weight:700;
-  color:var(--muted); transition:all .3s;
-  flex-shrink:0;
+  color:var(--muted); transition:all .3s; flex-shrink:0;
 }
 .step-circle.done { background:var(--green); border-color:var(--green); color:#fff; }
 .step-circle.active { background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:0 0 14px rgba(255,98,0,.4); }
-.step-label {
-  font-size:11px; font-weight:500; color:var(--muted); transition:color .3s;
-  white-space:nowrap;
-}
+.step-label { font-size:11px; font-weight:500; color:var(--muted); transition:color .3s; white-space:nowrap; }
 .step-label.active { color:var(--text); }
-.step-line {
-  width:32px; height:1px; background:var(--border); margin:0 6px; flex-shrink:0;
-  transition:background .3s;
-}
+.step-line { width:32px; height:1px; background:var(--border); margin:0 6px; flex-shrink:0; transition:background .3s; }
 .step-line.done { background:var(--green); }
 
-/* ── Sheet header ── */
 .sheet-hdr {
   padding:4px 24px 16px;
   border-bottom:1px solid var(--border);
@@ -371,52 +361,35 @@ header {
 .sheet-hdr h2 { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; }
 .sheet-hdr p { font-size:13px; color:var(--muted); margin-top:3px; }
 
-/* ── Sheet body ── */
 .sheet-body {
   flex:1; overflow-y:auto; padding:20px 24px;
   scrollbar-width:thin; scrollbar-color:var(--s3) transparent;
 }
 
-/* ── Pages ── */
 .page { display:none; flex-direction:column; gap:16px; }
 .page.on { display:flex; animation:pgIn .3s ease; }
 @keyframes pgIn { from{opacity:0;transform:translateX(14px)} to{opacity:1;transform:translateX(0)} }
 
-/* ── Form fields ── */
+/* Form */
 .field-group { display:flex; flex-direction:column; gap:14px; }
 .field-row { display:flex; gap:12px; }
 .field-row .f-field { flex:1; }
-
 .f-field { display:flex; flex-direction:column; gap:6px; }
-.f-label {
-  font-size:11px; font-weight:600; color:var(--muted);
-  letter-spacing:.6px; text-transform:uppercase;
-}
+.f-label { font-size:11px; font-weight:600; color:var(--muted); letter-spacing:.6px; text-transform:uppercase; }
 .f-input-wrap { position:relative; }
-.f-icon {
-  position:absolute; left:13px; top:50%; transform:translateY(-50%);
-  font-size:14px; opacity:.4; pointer-events:none; line-height:1;
-}
+.f-icon { position:absolute; left:13px; top:50%; transform:translateY(-50%); font-size:14px; opacity:.4; pointer-events:none; line-height:1; }
 .f-input {
   width:100%; padding:13px 13px 13px 40px;
   background:var(--s2); border:1px solid var(--border2);
   border-radius:11px; color:var(--text);
   font-family:'DM Sans',sans-serif; font-size:14px;
   transition:border-color .2s, box-shadow .2s;
-  -webkit-appearance:none;
 }
 .f-input::placeholder { color:var(--dim); }
-.f-input:focus {
-  outline:none;
-  border-color:rgba(255,98,0,.5);
-  box-shadow:0 0 0 3px rgba(255,98,0,.1);
-}
-.f-input.ok { border-color:rgba(0,201,107,.4); }
-.f-input.err { border-color:rgba(255,64,64,.45); }
+.f-input:focus { outline:none; border-color:rgba(255,98,0,.5); box-shadow:0 0 0 3px rgba(255,98,0,.1); }
 .f-hint { font-size:11px; color:var(--dim); margin-top:3px; }
 .f-hint.err { color:var(--red); }
 
-/* CEP row with button */
 .cep-row { display:flex; gap:10px; align-items:flex-end; }
 .cep-row .f-field { flex:1; }
 #btnBuscarCep {
@@ -428,7 +401,6 @@ header {
 #btnBuscarCep:hover { background:rgba(255,98,0,.2); border-color:rgba(255,98,0,.4); }
 #btnBuscarCep:disabled { opacity:.4; cursor:not-allowed; }
 
-/* ── Address preview card ── */
 #addrPreview {
   background:var(--s2); border:1px solid rgba(0,201,107,.2);
   border-radius:13px; padding:14px 16px;
@@ -444,7 +416,7 @@ header {
 .ap-label { font-size:11px; font-weight:600; color:var(--green); text-transform:uppercase; letter-spacing:.5px; margin-bottom:3px; }
 .ap-addr { font-size:14px; font-weight:500; color:var(--text); line-height:1.4; }
 
-/* ── Order summary ── */
+/* ── ORDER SUMMARY ── */
 .order-summary-items { display:flex; flex-direction:column; gap:8px; }
 .os-item {
   display:flex; align-items:center; gap:11px;
@@ -461,7 +433,6 @@ header {
 .os-qty  { font-size:11px; color:var(--muted); margin-top:1px; }
 .os-price { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--accent); flex-shrink:0; }
 
-/* address chip in summary */
 .addr-chip {
   background:var(--s2); border:1px solid var(--border2);
   border-radius:12px; padding:13px 15px;
@@ -472,7 +443,6 @@ header {
 .addr-chip-label { font-size:11px; color:var(--muted); font-weight:500; text-transform:uppercase; letter-spacing:.5px; margin-bottom:3px; }
 .addr-chip-addr { font-size:13px; font-weight:500; color:var(--text); line-height:1.35; }
 
-/* summary totals */
 .sum-table { display:flex; flex-direction:column; gap:7px; margin-top:4px; }
 .st-row { display:flex; justify-content:space-between; font-size:13px; color:var(--muted); }
 .st-row .val { font-weight:500; color:var(--text); }
@@ -482,7 +452,7 @@ header {
 .st-total .lbl { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; }
 .st-total .amt { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; color:var(--accent); letter-spacing:-.5px; }
 
-/* ── Payment options ── */
+/* ── PAYMENT OPTIONS ── */
 .pay-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .pay-opt {
   background:var(--s2); border:1px solid var(--border2);
@@ -496,13 +466,11 @@ header {
 .pay-name { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:var(--text); }
 .pay-sub { font-size:11px; color:var(--muted); }
 
-/* ── Section labels ── */
 .sec-label {
   font-family:'Syne',sans-serif; font-size:12px; font-weight:700;
   color:var(--muted); letter-spacing:1px; text-transform:uppercase;
 }
 
-/* ── Sheet footer ── */
 .sheet-foot {
   padding:14px 24px 28px; border-top:1px solid var(--border);
   display:flex; flex-direction:column; gap:10px; flex-shrink:0;
@@ -514,7 +482,7 @@ header {
   color:var(--muted); font-family:'DM Sans',sans-serif; font-size:20px;
   cursor:pointer; transition:all .2s; display:none;
 }
-#btnBack:hover { color:var(--text); border-color:var(--border2); background:var(--s3); }
+#btnBack:hover { color:var(--text); background:var(--s3); }
 #btnNext {
   flex:1; height:50px; border:none; border-radius:13px;
   background:var(--accent); color:#fff;
@@ -526,6 +494,122 @@ header {
 #btnNext:hover { transform:translateY(-2px); box-shadow:0 12px 36px rgba(255,98,0,.45); filter:brightness(1.07); }
 #btnNext:active { transform:scale(.97); }
 #btnNext:disabled { opacity:.4; cursor:not-allowed; transform:none; box-shadow:none; filter:none; }
+
+/* ══════════════════════════════════════
+   PIX QR MODAL — NOVO
+══════════════════════════════════════ */
+#pixModal {
+  position:fixed; inset:0; z-index:600;
+  display:flex; align-items:center; justify-content:center;
+  padding:20px;
+  opacity:0; pointer-events:none; transition:opacity .35s;
+}
+#pixModal.on { opacity:1; pointer-events:all; }
+#pixModal.on .pix-card { transform:translateY(0) scale(1); }
+
+.pix-backdrop {
+  position:absolute; inset:0;
+  background:rgba(0,0,0,.85); backdrop-filter:blur(10px);
+}
+
+.pix-card {
+  position:relative; z-index:1;
+  width:min(400px, 100%);
+  background:var(--s1);
+  border-radius:22px;
+  border:1px solid rgba(50,188,173,.2);
+  padding:28px 24px 24px;
+  display:flex; flex-direction:column; align-items:center; gap:20px;
+  transform:translateY(30px) scale(.97);
+  transition:transform .4s cubic-bezier(.32,.72,0,1);
+  box-shadow:0 30px 80px rgba(0,0,0,.8), 0 0 0 1px rgba(50,188,173,.08);
+}
+
+.pix-header { text-align:center; }
+.pix-logo {
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--pixdim); border:1px solid rgba(50,188,173,.25);
+  padding:7px 16px; border-radius:30px; margin-bottom:12px;
+}
+.pix-logo-icon { font-size:18px; }
+.pix-logo-text {
+  font-family:'Syne',sans-serif; font-size:14px; font-weight:800;
+  color:var(--pix); letter-spacing:.5px;
+}
+.pix-title { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; color:var(--text); }
+.pix-sub { font-size:13px; color:var(--muted); margin-top:4px; line-height:1.5; }
+
+/* QR area */
+.pix-qr-wrap {
+  background:#fff; border-radius:16px;
+  padding:14px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5), 0 0 0 4px rgba(50,188,173,.15);
+  position:relative;
+}
+#qrcode { width:180px; height:180px; display:flex; align-items:center; justify-content:center; }
+#qrcode img, #qrcode canvas { width:180px !important; height:180px !important; }
+
+.pix-amount-badge {
+  position:absolute; bottom:-16px; left:50%; transform:translateX(-50%);
+  background:var(--pix); color:#fff;
+  font-family:'Syne',sans-serif; font-size:15px; font-weight:800;
+  padding:6px 20px; border-radius:20px;
+  box-shadow:0 4px 14px rgba(50,188,173,.4);
+  white-space:nowrap;
+}
+
+/* Copy key */
+.pix-copy-section { width:100%; display:flex; flex-direction:column; gap:8px; margin-top:6px; }
+.pix-copy-label { font-size:11px; color:var(--muted); font-weight:600; text-align:center; text-transform:uppercase; letter-spacing:.6px; }
+.pix-copy-row {
+  display:flex; gap:8px;
+  background:var(--s2); border:1px solid var(--border2);
+  border-radius:11px; padding:10px 14px;
+  align-items:center;
+}
+.pix-key-text {
+  flex:1; font-size:13px; color:var(--text); font-family:'DM Sans',monospace;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+#btnCopyPix {
+  flex-shrink:0; padding:6px 14px; border-radius:8px;
+  background:var(--pixdim); border:1px solid rgba(50,188,173,.3);
+  color:var(--pix); font-size:12px; font-weight:700;
+  cursor:pointer; transition:all .2s; font-family:'DM Sans',sans-serif;
+}
+#btnCopyPix:hover { background:rgba(50,188,173,.22); }
+#btnCopyPix.copied { background:var(--gdim); border-color:rgba(0,201,107,.3); color:var(--green); }
+
+/* Timer */
+.pix-timer {
+  display:flex; align-items:center; gap:8px;
+  background:var(--adim); border:1px solid rgba(255,98,0,.2);
+  border-radius:10px; padding:8px 14px;
+  font-size:12px; color:var(--alight); width:100%; justify-content:center;
+}
+.pix-timer strong { font-family:'Syne',sans-serif; font-size:14px; }
+
+/* Confirm paid button */
+#btnPixPago {
+  width:100%; padding:15px; border:none; border-radius:13px;
+  background:linear-gradient(135deg, var(--pix), #26a99a);
+  color:#fff;
+  font-family:'Syne',sans-serif; font-size:15px; font-weight:800;
+  cursor:pointer;
+  box-shadow:0 8px 24px rgba(50,188,173,.3);
+  transition:transform .14s, filter .2s;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+#btnPixPago:hover { transform:translateY(-2px); filter:brightness(1.07); }
+#btnPixPago:active { transform:scale(.97); }
+
+#btnPixVoltar {
+  width:100%; padding:12px; border:none; border-radius:13px;
+  background:transparent; border:1px solid var(--border2);
+  color:var(--muted); font-family:'DM Sans',sans-serif; font-size:14px;
+  cursor:pointer; transition:all .2s;
+}
+#btnPixVoltar:hover { border-color:var(--border); color:var(--text); }
 
 /* ── TOAST ── */
 #toast {
@@ -542,7 +626,7 @@ header {
 
 /* ── SUCCESS ── */
 #successScreen {
-  position:fixed; inset:0; z-index:600;
+  position:fixed; inset:0; z-index:700;
   background:var(--bg);
   display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
   padding:32px;
@@ -577,6 +661,20 @@ header {
   animation:pgIn .4s .35s ease both;
 }
 .ss-eta .eta-num { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; }
+
+/* WhatsApp badge */
+.ss-wpp {
+  display:flex; align-items:center; gap:10px;
+  background:rgba(37,211,102,.1); border:1px solid rgba(37,211,102,.2);
+  border-radius:14px; padding:13px 20px;
+  font-size:13px; color:#25D366;
+  width:100%; max-width:340px;
+  animation:pgIn .4s .38s ease both;
+}
+.ss-wpp-icon { font-size:22px; flex-shrink:0; }
+.ss-wpp-text { line-height:1.4; }
+.ss-wpp-text strong { display:block; font-size:14px; margin-bottom:1px; }
+
 #ssClose {
   margin-top:4px; padding:14px 36px; border-radius:13px;
   background:var(--accent); border:none; color:#fff;
@@ -594,11 +692,26 @@ header {
   .steps-nav { padding:16px 18px 12px; gap:2px; }
   .step-line { width:20px; }
   .sheet-foot { padding:12px 18px 24px; }
-  .pay-grid { grid-template-columns:1fr 1fr; }
+  .pix-card { padding:22px 18px 20px; }
 }
 </style>
 </head>
 <body>
+
+<!-- ══════════════════════════════════════
+  ⚙️  CONFIGURAÇÕES — ALTERE AQUI
+══════════════════════════════════════ -->
+<script>
+  // 👇 TROQUE pela sua chave Pix (CPF, CNPJ, e-mail, telefone ou chave aleatória)
+  var PIX_CHAVE = "11999999999";
+
+  // 👇 TROQUE pelo nome que aparece no QR Code Pix
+  var PIX_NOME = "Zap Delivery";
+
+  // 👇 TROQUE pelo seu número do WhatsApp com código do país (sem + e sem espaços)
+  // Brasil: 55 + DDD + número. Ex: "5511999999999"
+  var WHATSAPP_NUMERO = "5511999999999";
+</script>
 
 <!-- HEADER -->
 <header>
@@ -705,7 +818,7 @@ header {
 <!-- OVERLAY -->
 <div id="overlay" onclick="overlayClick()"></div>
 
-<!-- ── DRAWER (CART) ── -->
+<!-- ── DRAWER ── -->
 <div id="drawer">
   <div class="drawer-head">
     <div class="drawer-head-title">🛒 Seu pedido <span id="drawerItemCount">0 itens</span></div>
@@ -734,15 +847,12 @@ header {
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     CHECKOUT MODAL
-══════════════════════════════════════ -->
+<!-- ══ CHECKOUT MODAL ══ -->
 <div id="checkoutModal">
   <div class="checkout-backdrop" onclick="fecharCheckout()"></div>
   <div class="checkout-sheet">
     <div class="sheet-handle"></div>
 
-    <!-- Steps -->
     <div class="steps-nav" id="stepsNav">
       <div class="step-item">
         <div class="step-circle active" id="sc1">1</div>
@@ -760,20 +870,16 @@ header {
       </div>
     </div>
 
-    <!-- Header -->
     <div class="sheet-hdr">
       <h2 id="sheetTitle">Endereço de entrega</h2>
       <p id="sheetSub">Informe onde entregar seu pedido</p>
     </div>
 
-    <!-- Body -->
     <div class="sheet-body">
 
       <!-- PAGE 1: Endereço -->
       <div class="page on" id="page1">
         <div class="field-group">
-
-          <!-- CEP -->
           <div class="f-field">
             <div class="f-label">CEP</div>
             <div class="cep-row">
@@ -788,7 +894,6 @@ header {
             </div>
           </div>
 
-          <!-- Address preview -->
           <div id="addrPreview">
             <div class="ap-icon">📍</div>
             <div class="ap-info">
@@ -797,7 +902,6 @@ header {
             </div>
           </div>
 
-          <!-- Rua -->
           <div class="f-field">
             <div class="f-label">Rua / Logradouro</div>
             <div class="f-input-wrap">
@@ -806,7 +910,6 @@ header {
             </div>
           </div>
 
-          <!-- Número + Complemento -->
           <div class="field-row">
             <div class="f-field">
               <div class="f-label">Número</div>
@@ -824,7 +927,6 @@ header {
             </div>
           </div>
 
-          <!-- Bairro + Cidade -->
           <div class="field-row">
             <div class="f-field">
               <div class="f-label">Bairro</div>
@@ -842,7 +944,6 @@ header {
             </div>
           </div>
 
-          <!-- Referência -->
           <div class="f-field">
             <div class="f-label">Ponto de referência <span style="color:var(--dim);font-weight:400;text-transform:none">(opcional)</span></div>
             <div class="f-input-wrap">
@@ -850,7 +951,6 @@ header {
               <input class="f-input" id="inRef" type="text" placeholder="Próximo ao mercado, portão azul...">
             </div>
           </div>
-
         </div>
       </div>
 
@@ -880,7 +980,6 @@ header {
           </div>
         </div>
 
-        <!-- Troco (exibe só para dinheiro) -->
         <div class="f-field" id="trocoField" style="display:none">
           <div class="f-label">Troco para</div>
           <div class="f-input-wrap">
@@ -893,8 +992,6 @@ header {
 
       <!-- PAGE 3: Resumo -->
       <div class="page" id="page3">
-
-        <!-- Endereço confirmado -->
         <div class="sec-label">Entrega em</div>
         <div class="addr-chip">
           <div class="addr-chip-icon">📍</div>
@@ -904,11 +1001,9 @@ header {
           </div>
         </div>
 
-        <!-- Itens -->
         <div class="sec-label" style="margin-top:4px">Itens do pedido</div>
         <div class="order-summary-items" id="resumoItens"></div>
 
-        <!-- Totais -->
         <div class="sum-table">
           <div class="st-row"><span>Subtotal</span><span class="val" id="rsSubtotal">—</span></div>
           <div class="st-row"><span>Taxa de entrega</span><span class="val free">Grátis 🎉</span></div>
@@ -919,7 +1014,6 @@ header {
           </div>
         </div>
 
-        <!-- Pagamento -->
         <div class="sec-label" style="margin-top:4px">Pagamento</div>
         <div class="addr-chip">
           <div class="addr-chip-icon" id="rsPayIcon">⚡</div>
@@ -928,11 +1022,9 @@ header {
             <div class="addr-chip-addr" id="rsPayName">Pix</div>
           </div>
         </div>
-
       </div>
     </div>
 
-    <!-- Footer navigation -->
     <div class="sheet-foot">
       <div class="foot-nav">
         <button id="btnBack" onclick="stepBack()">←</button>
@@ -944,6 +1036,43 @@ header {
   </div>
 </div>
 
+<!-- ══ PIX QR MODAL ══ -->
+<div id="pixModal">
+  <div class="pix-backdrop" onclick="fecharPix()"></div>
+  <div class="pix-card">
+    <div class="pix-header">
+      <div class="pix-logo">
+        <span class="pix-logo-icon">⚡</span>
+        <span class="pix-logo-text">PIX</span>
+      </div>
+      <div class="pix-title">Pague com Pix</div>
+      <div class="pix-sub">Escaneie o QR Code ou copie a chave abaixo</div>
+    </div>
+
+    <div class="pix-qr-wrap">
+      <div id="qrcode"></div>
+      <div class="pix-amount-badge" id="pixAmtBadge">R$ 0,00</div>
+    </div>
+
+    <div class="pix-copy-section">
+      <div class="pix-copy-label">Chave Pix</div>
+      <div class="pix-copy-row">
+        <span class="pix-key-text" id="pixKeyDisplay"></span>
+        <button id="btnCopyPix" onclick="copiarChave()">Copiar</button>
+      </div>
+    </div>
+
+    <div class="pix-timer">
+      ⏱ Expira em <strong id="pixTimerText">10:00</strong>
+    </div>
+
+    <button id="btnPixPago" onclick="confirmarPagamentoPix()">
+      ✅ Já realizei o pagamento
+    </button>
+    <button id="btnPixVoltar" onclick="fecharPix()">← Voltar e escolher outro método</button>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div id="toast"></div>
 
@@ -951,7 +1080,7 @@ header {
 <div id="successScreen">
   <div class="ss-pulse">✅</div>
   <div class="ss-title">Pedido confirmado!</div>
-  <div class="ss-sub" id="ssSub">Seu pedido foi recebido com sucesso. Acompanhe pela tela.</div>
+  <div class="ss-sub" id="ssSub">Seu pedido foi recebido. Acompanhe pela tela.</div>
   <div class="ss-addr" id="ssAddr">
     <div class="ss-addr-icon">📍</div>
     <div class="ss-addr-text"><strong id="ssAddrLine">—</strong><span id="ssAddrSub">—</span></div>
@@ -959,6 +1088,13 @@ header {
   <div class="ss-eta">
     <span>🛵 Entrega estimada em</span>
     <span class="eta-num">~30 min</span>
+  </div>
+  <div class="ss-wpp">
+    <div class="ss-wpp-icon">📲</div>
+    <div class="ss-wpp-text">
+      <strong>Pedido enviado ao WhatsApp!</strong>
+      O estabelecimento já recebeu seu pedido.
+    </div>
   </div>
   <button id="ssClose" onclick="fecharSuccess()">Perfeito, obrigado! 👍</button>
 </div>
@@ -968,8 +1104,12 @@ header {
 var cart = {};
 var _drawerOpen = false;
 var _checkoutOpen = false;
+var _pixOpen = false;
 var _step = 1;
 var _payMethod = 'pix';
+var _pixTimer = null;
+var _pixSeconds = 600; // 10 minutos
+var _qrInstance = null;
 
 var PAY_META = {
   pix:      { icon: '⚡', name: 'Pix — Instantâneo' },
@@ -990,6 +1130,12 @@ function showToast(msg){
   _tt = setTimeout(function(){ el.classList.remove('on'); }, 2400);
 }
 
+function cartTotal(){
+  var t = 0;
+  Object.keys(cart).forEach(function(k){ t += cart[k].qtd * cart[k].preco; });
+  return t;
+}
+
 /* ══ OVERLAY ══ */
 function overlayClick(){
   if(_drawerOpen) toggleDrawer();
@@ -1003,7 +1149,7 @@ function toggleDrawer(){
   document.body.style.overflow = _drawerOpen ? 'hidden' : '';
 }
 
-/* ══ CART LOGIC ══ */
+/* ══ CART ══ */
 function add(id, label, preco, emoji){
   if(!cart[id]) cart[id] = { label:label, preco:preco, emoji:emoji, qtd:0 };
   cart[id].qtd++;
@@ -1027,7 +1173,6 @@ function render(){
   var count = 0, total = 0;
   ids.forEach(function(k){ count += cart[k].qtd; total += cart[k].qtd * cart[k].preco; });
 
-  // Badge
   var badge = document.getElementById('cartBadge');
   badge.textContent = count;
   if(count > 0){
@@ -1037,7 +1182,6 @@ function render(){
     badge.classList.remove('show','pop');
   }
 
-  // Counter nums
   ['xburger','xtudo','fritas','milkshake'].forEach(function(id){
     var q = document.getElementById('q-'+id);
     var m = document.getElementById('m-'+id);
@@ -1047,7 +1191,6 @@ function render(){
 
   document.getElementById('drawerItemCount').textContent = count + (count===1?' item':' itens');
 
-  // Cart items
   var body = document.getElementById('drawerBody');
   body.querySelectorAll('.cart-item').forEach(function(el){ el.remove(); });
 
@@ -1094,47 +1237,38 @@ function filtrar(btn, cat){
   document.getElementById('menuCount').textContent = v+(v===1?' item':' itens');
 }
 
-/* ══ CEP MASK ══ */
+/* ══ CEP ══ */
 function maskCep(el){
   var v = el.value.replace(/\D/g,'');
   if(v.length > 5) v = v.slice(0,5)+'-'+v.slice(5,8);
   el.value = v;
 }
 
-/* ══ BUSCAR CEP ══ */
 function buscarCep(){
   var raw = document.getElementById('inCep').value.replace(/\D/g,'');
   if(raw.length !== 8) return;
-
   var hint = document.getElementById('cepHint');
   hint.className = 'f-hint';
   hint.textContent = '🔍 Buscando...';
-
   document.getElementById('btnBuscarCep').disabled = true;
-
   fetch('https://viacep.com.br/ws/'+raw+'/json/')
     .then(function(r){ return r.json(); })
     .then(function(d){
       document.getElementById('btnBuscarCep').disabled = false;
       if(d.erro){
         hint.className = 'f-hint err';
-        hint.textContent = '❌ CEP não encontrado. Verifique e tente novamente.';
+        hint.textContent = '❌ CEP não encontrado.';
         document.getElementById('addrPreview').classList.remove('on');
         return;
       }
-      // Fill fields
       document.getElementById('inRua').value    = d.logradouro || '';
       document.getElementById('inBairro').value = d.bairro     || '';
       document.getElementById('inCidade').value = (d.localidade||'') + (d.uf ? ' — '+d.uf : '');
-
-      // Preview
       var preview = [d.logradouro, d.bairro, d.localidade, d.uf].filter(Boolean).join(', ');
       document.getElementById('apAddr').textContent = preview;
       document.getElementById('addrPreview').classList.add('on');
-
       hint.className = 'f-hint';
       hint.textContent = '✅ Endereço preenchido automaticamente';
-
       document.getElementById('inNumero').focus();
     })
     .catch(function(){
@@ -1163,62 +1297,36 @@ function fecharCheckout(){
 }
 
 function updateStepUI(){
-  // Step circles
   for(var i=1;i<=3;i++){
     var sc = document.getElementById('sc'+i);
     var sl = document.getElementById('sl'+i);
     sc.className = 'step-circle' + (i<_step?' done':i===_step?' active':'');
     sl.className = 'step-label'  + (i===_step?' active':'');
-    if(i<_step) sc.textContent = '✓';
-    else sc.textContent = i;
+    sc.textContent = i<_step ? '✓' : i;
   }
-  // Lines
   for(var j=1;j<=2;j++){
     var ln = document.getElementById('sln'+j);
     if(ln) ln.className = 'step-line' + (j<_step?' done':'');
   }
-
-  // Pages
   for(var p=1;p<=3;p++){
     document.getElementById('page'+p).classList.toggle('on', p===_step);
   }
-
-  // Header
   var titles = ['Endereço de entrega','Forma de pagamento','Confirmar pedido'];
   var subs   = ['Informe onde entregar seu pedido','Escolha como deseja pagar','Revise e confirme seu pedido'];
   document.getElementById('sheetTitle').textContent = titles[_step-1];
   document.getElementById('sheetSub').textContent   = subs[_step-1];
-
-  // Buttons
   document.getElementById('btnBack').style.display = _step > 1 ? '' : 'none';
-  var nl = document.getElementById('btnNextLabel');
-  nl.textContent = _step === 3 ? 'Confirmar pedido' : 'Continuar';
-
-  // Build summary on step 3
+  document.getElementById('btnNextLabel').textContent = _step === 3 ? 'Confirmar pedido' : 'Continuar';
   if(_step === 3) buildResumo();
 }
 
-/* ── Validate step 1 ── */
 function validateAddr(){
   var rua    = document.getElementById('inRua').value.trim();
   var numero = document.getElementById('inNumero').value.trim();
   var cep    = document.getElementById('inCep').value.replace(/\D/g,'');
-
-  if(cep.length !== 8){
-    showToast('⚠️ Informe um CEP válido');
-    document.getElementById('inCep').focus();
-    return false;
-  }
-  if(!rua){
-    showToast('⚠️ Informe a rua');
-    document.getElementById('inRua').focus();
-    return false;
-  }
-  if(!numero){
-    showToast('⚠️ Informe o número');
-    document.getElementById('inNumero').focus();
-    return false;
-  }
+  if(cep.length !== 8){ showToast('⚠️ Informe um CEP válido'); document.getElementById('inCep').focus(); return false; }
+  if(!rua){ showToast('⚠️ Informe a rua'); document.getElementById('inRua').focus(); return false; }
+  if(!numero){ showToast('⚠️ Informe o número'); document.getElementById('inNumero').focus(); return false; }
   return true;
 }
 
@@ -1241,7 +1349,6 @@ function stepBack(){
   updateStepUI();
 }
 
-/* ── Payment select ── */
 function selPay(el, method){
   document.querySelectorAll('.pay-opt').forEach(function(o){ o.classList.remove('sel'); });
   el.classList.add('sel');
@@ -1249,11 +1356,9 @@ function selPay(el, method){
   document.getElementById('trocoField').style.display = method==='dinheiro' ? '' : 'none';
 }
 
-/* ── Build resumo ── */
 function buildResumo(){
   var ids = Object.keys(cart);
   var total = 0;
-
   var html = '';
   ids.forEach(function(k){
     var it = cart[k];
@@ -1268,37 +1373,210 @@ function buildResumo(){
         '<div class="os-price">'+R(it.qtd*it.preco)+'</div>'+
       '</div>';
   });
-
   document.getElementById('resumoItens').innerHTML = html;
   document.getElementById('rsSubtotal').textContent = R(total);
   document.getElementById('rsTotal').textContent    = R(total);
 
-  // Address
   var rua    = document.getElementById('inRua').value.trim();
   var numero = document.getElementById('inNumero').value.trim();
   var comp   = document.getElementById('inComp').value.trim();
   var bairro = document.getElementById('inBairro').value.trim();
   var cidade = document.getElementById('inCidade').value.trim();
   var cep    = document.getElementById('inCep').value.trim();
-
   var addr = rua + ', ' + numero;
   if(comp)   addr += ' – ' + comp;
   if(bairro) addr += ', ' + bairro;
   if(cidade) addr += ' · ' + cidade;
   if(cep)    addr += ' · CEP ' + cep;
-
   document.getElementById('resumoAddr').textContent = addr;
 
-  // Payment
   var pm = PAY_META[_payMethod] || PAY_META.pix;
   document.getElementById('rsPayIcon').textContent = pm.icon;
   document.getElementById('rsPayName').textContent = pm.name;
 }
 
-/* ── Confirm ── */
+/* ══ CONFIRMAR PEDIDO ══ */
 function confirmarPedido(){
+  if(!Object.keys(cart).length) return;
+
+  if(_payMethod === 'pix'){
+    // Fecha checkout e abre Pix
+    fecharCheckout();
+    abrirPix();
+  } else {
+    // Pagamento na entrega: vai direto pro sucesso + WhatsApp
+    enviarPedido('Dinheiro/Cartão na entrega');
+  }
+}
+
+/* ══════════════════════════════════════
+   PIX QR CODE
+══════════════════════════════════════ */
+
+// Gera payload EMV QR Code Pix estático simplificado
+function gerarPixPayload(chave, nome, valor, cidade){
+  cidade = (cidade || 'CIDADE').toUpperCase().replace(/[^A-Z0-9 ]/g,'').substring(0,15) || 'CIDADE';
+  nome   = nome.toUpperCase().replace(/[^A-Z0-9 ]/g,'').substring(0,25) || 'LOJA';
+
+  // Formata valor com 2 casas
+  var valorStr = valor.toFixed(2);
+
+  function tlv(id, val){
+    var len = String(val.length).padStart(2,'0');
+    return id + len + val;
+  }
+
+  var merchantAccountInfo =
+    tlv('00','BR.GOV.BCB.PIX') +
+    tlv('01', chave);
+
+  var mcc         = '0000';
+  var currency    = '986';
+  var txAmount    = valorStr;
+  var countryCode = 'BR';
+  var txId        = '***';
+
+  var additionalData = tlv('05', txId);
+
+  var payload =
+    tlv('00','01') +                              // Payload Format Indicator
+    tlv('26', merchantAccountInfo) +              // Merchant Account Info
+    tlv('52', mcc) +                              // MCC
+    tlv('53', currency) +                         // Transaction Currency
+    tlv('54', txAmount) +                         // Transaction Amount
+    tlv('58', countryCode) +                      // Country Code
+    tlv('59', nome) +                             // Merchant Name
+    tlv('60', cidade) +                           // Merchant City
+    tlv('62', additionalData);                    // Additional Data
+
+  // CRC16-CCITT
+  payload += '6304';
+  var crc = crc16(payload);
+  payload += crc.toString(16).toUpperCase().padStart(4,'0');
+
+  return payload;
+}
+
+function crc16(str){
+  var crc = 0xFFFF;
+  for(var i = 0; i < str.length; i++){
+    crc ^= str.charCodeAt(i) << 8;
+    for(var j = 0; j < 8; j++){
+      if(crc & 0x8000) crc = (crc << 1) ^ 0x1021;
+      else crc <<= 1;
+      crc &= 0xFFFF;
+    }
+  }
+  return crc;
+}
+
+function abrirPix(){
+  _pixOpen = true;
+  var total = cartTotal();
+
+  // Atualiza badge de valor
+  document.getElementById('pixAmtBadge').textContent = R(total);
+  document.getElementById('pixKeyDisplay').textContent = PIX_CHAVE;
+
+  // Gera QR Code
+  var qrDiv = document.getElementById('qrcode');
+  qrDiv.innerHTML = '';
+
+  var cidade = document.getElementById('inCidade').value.trim().split('—')[0].trim() || 'CIDADE';
+  var payload = gerarPixPayload(PIX_CHAVE, PIX_NOME, total, cidade);
+
+  try {
+    new QRCode(qrDiv, {
+      text: payload,
+      width: 180,
+      height: 180,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } catch(e) {
+    // Fallback se a lib não carregou ainda
+    qrDiv.innerHTML = '<div style="width:180px;height:180px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#666;text-align:center;padding:10px">QR Code<br>indisponível<br><small>Copie a chave</small></div>';
+  }
+
+  // Timer 10 min
+  _pixSeconds = 600;
+  clearInterval(_pixTimer);
+  atualizarTimer();
+  _pixTimer = setInterval(function(){
+    _pixSeconds--;
+    if(_pixSeconds <= 0){
+      clearInterval(_pixTimer);
+      document.getElementById('pixTimerText').textContent = '00:00';
+    } else {
+      atualizarTimer();
+    }
+  }, 1000);
+
+  // Reseta botão copiar
+  var btn = document.getElementById('btnCopyPix');
+  btn.textContent = 'Copiar';
+  btn.classList.remove('copied');
+
+  document.getElementById('pixModal').classList.add('on');
+  document.getElementById('overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+
+function atualizarTimer(){
+  var m = Math.floor(_pixSeconds / 60);
+  var s = _pixSeconds % 60;
+  document.getElementById('pixTimerText').textContent =
+    String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+function fecharPix(){
+  clearInterval(_pixTimer);
+  _pixOpen = false;
+  document.getElementById('pixModal').classList.remove('on');
+  document.getElementById('overlay').classList.remove('on');
+  document.body.style.overflow = '';
+  // Reabre checkout no step 2
+  abrirCheckout();
+  _step = 2;
+  updateStepUI();
+}
+
+function copiarChave(){
+  var btn = document.getElementById('btnCopyPix');
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(PIX_CHAVE).then(function(){
+      btn.textContent = 'Copiado ✓';
+      btn.classList.add('copied');
+      showToast('✅ Chave Pix copiada!');
+      setTimeout(function(){ btn.textContent='Copiar'; btn.classList.remove('copied'); }, 3000);
+    });
+  } else {
+    // Fallback
+    var ta = document.createElement('textarea');
+    ta.value = PIX_CHAVE;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = 'Copiado ✓';
+    btn.classList.add('copied');
+    showToast('✅ Chave Pix copiada!');
+    setTimeout(function(){ btn.textContent='Copiar'; btn.classList.remove('copied'); }, 3000);
+  }
+}
+
+function confirmarPagamentoPix(){
+  clearInterval(_pixTimer);
+  _pixOpen = false;
+  document.getElementById('pixModal').classList.remove('on');
+  enviarPedido('Pix ✅ Pago');
+}
+
+/* ══ ENVIAR PEDIDO ══ */
+function enviarPedido(statusPagamento){
   var ids = Object.keys(cart);
-  if(!ids.length) return;
+  var total = cartTotal();
 
   var rua    = document.getElementById('inRua').value.trim();
   var numero = document.getElementById('inNumero').value.trim();
@@ -1306,21 +1584,54 @@ function confirmarPedido(){
   var bairro = document.getElementById('inBairro').value.trim();
   var cidade = document.getElementById('inCidade').value.trim();
   var cep    = document.getElementById('inCep').value.trim();
+  var ref    = document.getElementById('inRef').value.trim();
 
   var addrLine = rua + ', ' + numero + (comp?' – '+comp:'');
   var addrSub  = (bairro?bairro+' · ':'') + cidade + ' · CEP ' + cep;
+  var enderecoCompleto = addrLine + '\n' + addrSub + (ref?'\nRef: '+ref:'');
 
-  var total = 0;
-  ids.forEach(function(k){ total += cart[k].qtd * cart[k].preco; });
+  // ── Monta mensagem WhatsApp ──
+  var now = new Date();
+  var hora = now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  var data = now.toLocaleDateString('pt-BR');
 
+  var msg = '🛵 *NOVO PEDIDO — Zap Delivery*\n';
+  msg += '📅 ' + data + ' às ' + hora + '\n';
+  msg += '━━━━━━━━━━━━━━━━\n';
+  msg += '*🛒 ITENS DO PEDIDO:*\n';
+
+  ids.forEach(function(k){
+    var it = cart[k];
+    msg += it.emoji + ' ' + it.label + ' x' + it.qtd + ' → ' + R(it.qtd * it.preco) + '\n';
+  });
+
+  msg += '━━━━━━━━━━━━━━━━\n';
+  msg += '💰 *TOTAL: ' + R(total) + '*\n';
+  msg += '💳 *Pagamento: ' + statusPagamento + '*\n';
+  msg += '━━━━━━━━━━━━━━━━\n';
+  msg += '📍 *ENTREGA EM:*\n';
+  msg += enderecoCompleto + '\n';
+  msg += '━━━━━━━━━━━━━━━━\n';
+  msg += '✅ Confirme o recebimento respondendo esta mensagem!';
+
+var urlWpp = 'https://wa.me/5591980208294?text=' + encodeURIComponent(msg);
+
+  // Atualiza tela de sucesso
   document.getElementById('ssAddrLine').textContent = addrLine;
   document.getElementById('ssAddrSub').textContent  = addrSub;
-  document.getElementById('ssSub').textContent      = 'Pedido de '+R(total)+' confirmado! Acompanhe a entrega.';
+  document.getElementById('ssSub').textContent      = 'Pedido de ' + R(total) + ' confirmado! Acompanhe a entrega.';
 
+  // Fecha tudo
   fecharCheckout();
   document.getElementById('overlay').classList.remove('on');
+
+  // Abre WhatsApp em nova aba
+  window.open(urlWpp, '_blank');
+
+  // Mostra tela de sucesso
   document.getElementById('successScreen').classList.add('on');
 
+  // Limpa carrinho
   cart = {};
   render();
 }
@@ -1328,7 +1639,6 @@ function confirmarPedido(){
 function fecharSuccess(){
   document.getElementById('successScreen').classList.remove('on');
   document.body.style.overflow = '';
-  // Clear address form
   ['inCep','inRua','inNumero','inComp','inBairro','inCidade','inRef'].forEach(function(id){
     document.getElementById(id).value = '';
   });
